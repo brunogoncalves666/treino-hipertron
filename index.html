@@ -1,1 +1,182 @@
+<!DOCTYPE html><html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Treino Hipertron</title>
+  <style>
+    :root {
+      --bg: #0f0f0f;
+      --card: #1b1b1b;
+      --primary: #1e88e5;
+      --text: #f5f5f5;
+      --muted: #b0b0b0;
+    }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 16px;
+    }
+    h1, h2 {
+      text-align: center;
+      margin: 8px 0 16px;
+    }
+    .menu {
+      display: grid;
+      gap: 14px;
+      margin-top: 24px;
+    }
+    button {
+      padding: 16px;
+      font-size: 18px;
+      border: none;
+      border-radius: 12px;
+      background: var(--primary);
+      color: #fff;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 10px rgba(0,0,0,.4);
+    }
+    .icon {
+      width: 100%;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+    .info {
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .done {
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .back {
+      margin-bottom: 16px;
+      background: #555;
+    }
+    .timer {
+      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+    }
+    .timer button {
+      flex: 1;
+      font-size: 14px;
+      padding: 10px;
+    }
+    .history {
+      margin-top: 20px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body><h1>Treino Hipertron</h1>
+<div id="app"></div><script>
+const iconSVG = `
+<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#1e88e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="3" y="10" width="18" height="4" />
+  <line x1="6" y1="6" x2="6" y2="18" />
+  <line x1="18" y1="6" x2="18" y2="18" />
+</svg>`;
 
+const treinos = {
+  A: [
+    { nome: "Supino Reto", info: "4x 8–10 | Descanso 90s", descanso: 90 },
+    { nome: "Puxada Frente", info: "3x 8–10 | Descanso 90s", descanso: 90 },
+    { nome: "Leg Press", info: "3x 10 | Descanso 90s", descanso: 90 },
+    { nome: "Desenvolvimento Ombro", info: "3x 10–12 | Descanso 60s", descanso: 60 },
+    { nome: "Tríceps Polia", info: "3x 10–12 | Descanso 60s", descanso: 60 },
+    { nome: "Panturrilha", info: "3x 12–15 | Descanso 45s", descanso: 45 }
+  ],
+  B: [
+    { nome: "Remada Baixa", info: "4x 8–10 | Descanso 90s", descanso: 90 },
+    { nome: "Supino Inclinado", info: "3x 8–10 | Descanso 90s", descanso: 90 },
+    { nome: "Terra Romeno", info: "3x 8–10 | Descanso 90s", descanso: 90 },
+    { nome: "Elevação Lateral", info: "3x 12 | Descanso 60s", descanso: 60 },
+    { nome: "Rosca Direta", info: "3x 10–12 | Descanso 60s", descanso: 60 },
+    { nome: "Abdômen", info: "3 séries", descanso: 45 }
+  ],
+  C: [
+    { nome: "Agachamento", info: "4x 8–10 | Descanso 90s", descanso: 90 },
+    { nome: "Mesa Flexora", info: "3x 10–12 | Descanso 60s", descanso: 60 },
+    { nome: "Cadeira Extensora", info: "3x 12 | Descanso 60s", descanso: 60 },
+    { nome: "Puxada Fechada", info: "3x 10 | Descanso 60s", descanso: 60 },
+    { nome: "Rosca Alternada", info: "3x 10 | Descanso 60s", descanso: 60 },
+    { nome: "Tríceps Testa", info: "3x 10–12 | Descanso 60s", descanso: 60 }
+  ]
+};
+
+const app = document.getElementById('app');
+
+function salvarHistorico(letra) {
+  const data = new Date().toLocaleDateString();
+  localStorage.setItem(`treino_${letra}`, data);
+}
+
+function iniciarTimer(segundos, el) {
+  let tempo = segundos;
+  el.textContent = `Descanso: ${tempo}s`;
+  const interval = setInterval(() => {
+    tempo--;
+    el.textContent = `Descanso: ${tempo}s`;
+    if (tempo <= 0) {
+      clearInterval(interval);
+      el.textContent = 'Descanso finalizado';
+    }
+  }, 1000);
+}
+
+function menu() {
+  app.innerHTML = `
+    <div class="menu">
+      <button onclick="abrir('A')">Treino A</button>
+      <button onclick="abrir('B')">Treino B</button>
+      <button onclick="abrir('C')">Treino C</button>
+      <div class="history">
+        Últimos treinos:<br>
+        A: ${localStorage.getItem('treino_A') || '-'}<br>
+        B: ${localStorage.getItem('treino_B') || '-'}<br>
+        C: ${localStorage.getItem('treino_C') || '-'}
+      </div>
+    </div>`;
+}
+
+function abrir(letra) {
+  let html = `<button class="back" onclick="menu()">⬅ Voltar</button>`;
+  html += `<h2>Treino ${letra}</h2>`;
+
+  treinos[letra].forEach((ex, i) => {
+    html += `
+      <div class="card">
+        <div class="icon">${iconSVG}</div>
+        <strong>${ex.nome}</strong>
+        <div class="info">${ex.info}</div>
+        <div class="timer">
+          <button onclick="iniciarTimer(${ex.descanso}, this)">Iniciar descanso</button>
+        </div>
+        <div class="done">
+          <input type="checkbox"> Concluído
+        </div>
+      </div>`;
+  });
+
+  html += `<button onclick="salvarHistorico('${letra}')">Salvar treino do dia</button>`;
+  app.innerHTML = html;
+}
+
+menu();
+</script></body>
+</html>
